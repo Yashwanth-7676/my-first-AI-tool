@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user
 from app.core.database import get_db
-from app.models.entities import User
 from app.schemas.chat import ChatRequest
 from app.services.rag_service import RAGService
 
@@ -15,10 +13,8 @@ rag_service = RAGService()
 @router.post("/stream")
 async def stream_chat(
     payload: ChatRequest,
-    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-
     """
     Anti-Gravity Streaming Endpoint:
     Delivers real-time token streams via SSE/HTTP chunked transfer.
@@ -28,7 +24,6 @@ async def stream_chat(
         try:
             context = await rag_service.retrieve_context(payload.query, db)
         except Exception:
-            # Graceful fallback if vector DB is not yet populated
             context = []
 
     async def token_generator():

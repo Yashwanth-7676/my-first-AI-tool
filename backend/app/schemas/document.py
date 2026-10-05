@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class DocumentCreateText(BaseModel):
@@ -10,6 +10,5 @@ class DocumentCreateText(BaseModel):
 class DocumentResponse(BaseModel):
     id: uuid.UUID
     title: str
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True

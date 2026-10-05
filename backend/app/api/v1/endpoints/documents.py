@@ -74,3 +74,20 @@ async def upload_file_document(
         raw_text=raw_text,
     )
     return document
+
+
+@router.delete("/{document_id}")
+async def delete_document(
+    document_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete an indexed document and its associated vector chunks."""
+    stmt = select(Document).where(Document.id == document_id)
+    result = await db.execute(stmt)
+    doc = result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    await db.delete(doc)
+    await db.commit()
+    return {"status": "success", "message": f"Document {document_id} deleted"}
+

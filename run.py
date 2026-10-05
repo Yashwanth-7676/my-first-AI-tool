@@ -2,6 +2,14 @@ import subprocess
 import sys
 import os
 
+# Ensure UTF-8 output on Windows consoles to prevent charmap errors
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 root_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.join(root_dir, "backend")
 venv_python = os.path.join(backend_dir, "venv", "Scripts", "python.exe")
@@ -19,9 +27,9 @@ cmd = [
 ]
 
 print("=" * 60)
-print("🚀 Starting Yash AI Backend Server...")
-print("📡 API URL: http://localhost:8000")
-print("📖 Swagger API Docs: http://localhost:8000/docs")
+print("[STARTING] Yash AI Backend Server...")
+print("[API URL]  http://localhost:8000")
+print("[SWAGGER]  http://localhost:8000/docs")
 print("=" * 60)
 
 try:

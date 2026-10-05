@@ -42,8 +42,13 @@ class IngestionService:
             await db.commit()
             return document
 
-        # 3. Generate embeddings concurrently
-        embeddings_list = await self.rag_service.embeddings.aembed_documents(chunks)
+        # 3. Generate embeddings concurrently if provider is available
+        embeddings_list = [None] * len(chunks)
+        if self.rag_service.embeddings:
+            try:
+                embeddings_list = await self.rag_service.embeddings.aembed_documents(chunks)
+            except Exception:
+                embeddings_list = [None] * len(chunks)
 
         # 4. Create chunk records
         chunk_models = [
@@ -52,7 +57,7 @@ class IngestionService:
                 document_id=document.id,
                 content=chunk_text,
                 chunk_index=i,
-                embedding=embeddings_list[i],
+                embedding=str(embeddings_list[i]) if embeddings_list[i] is not None and getattr(self.rag_service, "use_sqlite", False) else embeddings_list[i],
             )
             for i, chunk_text in enumerate(chunks)
         ]
@@ -61,3 +66,4 @@ class IngestionService:
         await db.refresh(document)
 
         return document
+
